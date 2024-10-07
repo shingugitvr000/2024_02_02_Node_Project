@@ -14,6 +14,7 @@ public class GameController : MonoBehaviour
         gameAPI = gameObject.AddComponent<GameAPI>();
         gameView.SetRegisterButtonListener(OnRegisterButtonClicked);
         gameView.SetLoginButtonListener(OnLoginButtonClicked);
+        gameView.SetCollectButtonListener(OnCollectButtonClicked);
     }
 
     public void OnRegisterButtonClicked()
@@ -26,6 +27,30 @@ public class GameController : MonoBehaviour
     {
         string playerName = gameView.playerNameInput.text;
         StartCoroutine(LoginPlayerCoroutine(playerName, "1234"));     //예시 비밀번호
+    }
+
+    public void OnCollectButtonClicked()
+    {
+        if(playerModel != null)
+        {
+            Debug.Log($"Collecting resources for : {playerModel.playerName}");
+            StartCoroutine(CollectCoroutine(playerModel.playerName));   //PlayerModel.name 사용            
+        }
+        else
+        {
+            Debug.LogError("Player model is null");
+        }
+    }
+
+    private IEnumerator CollectCoroutine(string playerName)
+    {
+        yield return gameAPI.CollectResources(playerName, player =>
+        {
+            playerModel.metal = player.metal;
+            playerModel.crystal = player.crystal;
+            playerModel.deuterium = player.deuterium;
+            UpdateResourcesDisplay();
+        });
     }
 
     private IEnumerator LoginPlayerCoroutine(string playerName, string password)
