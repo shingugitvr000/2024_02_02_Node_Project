@@ -14,11 +14,12 @@ const pool = mysql.createPool({
 
 //플레이어 로그인
 app.post('/login' , async (req, res) => {
-    const { username, password_hash} = req.body;
+    const { username, password_hash} = req.body;   
     try
     {
         const [players] = await pool.query(
-            'SELCET * FROM players WHERE username = ? AND password_hash = ?',
+            
+            `SELECT * FROM players WHERE username = ? AND password_hash = ?`,
             [username, password_hash]
         );
         if (players.length > 0)
@@ -27,7 +28,7 @@ app.post('/login' , async (req, res) => {
                 'UPDATE players SET last_login = CURRENT_TIMESTAMP WHERE player_id = ?',
                 [players[0].player_id]
             );
-            res.json({success: true, plyaer:players[0]});
+            res.json({success: true, player:players[0]});
         }
         else
         {
@@ -36,7 +37,7 @@ app.post('/login' , async (req, res) => {
     }
     catch (error)
     {
-        res.status(500).json({ success: false , message : error.message});
+       res.status(500).json({ success: false , message : error.message});
     }
 });
 
@@ -46,7 +47,7 @@ app.get('/inventory/:playerId', async (req, res) => {
     try
     {
         const[inventory] = await pool.query(
-            'SELECT i.* inv.quantity FROM inventories inv JOIN items i ON inv.item_id = i.item_id WHERE inv.player_id = ?',
+            'SELECT i.* , inv.quantity FROM inventories inv JOIN items i ON inv.item_id = i.item_id WHERE inv.player_id = ?',
             [req.params.playerId]
         );
         res.json(inventory);
