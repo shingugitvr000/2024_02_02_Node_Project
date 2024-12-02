@@ -6,8 +6,6 @@ using System.Text;
 using UnityEngine.Networking;
 using Newtonsoft;
 using Newtonsoft.Json;
-using UnityEditor.SceneManagement;
-
 public class AuthManager : MonoBehaviour
 {
     //서버 URL 및 PlayerPrefs 키 상수 정의

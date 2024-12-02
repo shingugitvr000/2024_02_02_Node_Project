@@ -37,24 +37,57 @@ class GameServer {
 
             socket.send(JSON.stringify(welcomeData));
 
-            socket.on('message' , (message) => {
-                try
-                {
-                    const data = JSON.parse(message);
+            // 새로 추가: 현재 접속해 있는 다른 플레이어들의 위치 정보 전송
+            this.players.forEach((playerInfo, id) => {
+                if (id !== playerId) {
+                    socket.send(JSON.stringify({
+                        type: 'playerPosition',
+                        playerId: id,
+                        position: playerInfo.position
+                    }));
+                }
+            });
 
-                    const messageString = iconv.decode(Buffer.from(data.message), 'euc-kr');
-                    console.log(`수신된 메세지 : ` , messageString);
-                    this.broadcast({
-                        type: `chat`,
-                        message: messageString
-                    });
+            socket.on('message', (message) => {
+                try {
+                    const data = JSON.parse(message);
+                    
+                    // switch문으로 메시지 타입 처리 추가
+                    switch(data.type) {
+                        case 'chat':
+                            try {
+                                const messageString = iconv.decode(Buffer.from(data.message), 'euc-kr');
+                                console.log(`수신된 메세지 : `, messageString);
+                                this.broadcast({
+                                    type: `chat`,
+                                    message: messageString
+                                });
+                            } catch (error) {
+                                const messageString = iconv.decode(message, 'euc-kr');
+                                console.log(`수신된 메세지 :`, messageString);
+                                this.broadcast({
+                                    type: `chat`,
+                                    message: messageString
+                                });
+                            }
+                            break;
+            
+                        // 여기서부터 새로 추가되는 부분    
+                        case 'playerPosition':
+                            // 플레이어 위치 업데이트
+                            if (this.players.has(playerId)) {
+                                this.players.get(playerId).position = data.position;
+                                // 다른 모든 클라이언트에게 위치 정보 전송
+                                this.broadcast({
+                                    type: 'playerPosition',
+                                    playerId: playerId,
+                                    position: data.position
+                                });
+                            }
+                            break;
+                    }
                 } catch (error) {
-                    const messageString = iconv.decode(message, 'euc-kr');
-                    console.log(`수신된 메세지 :` , messageString);
-                    this.broadcast({
-                        type: `chat`,
-                        message: messageString
-                    });
+                    console.error('메시지 처리 중 오류:', error);
                 }
             });
 
@@ -84,7 +117,7 @@ class GameServer {
 
     generatePlayerId()
     {
-        return `player_` + Math.random().toString(36),substr(2,9);
+        return `player_` + Math.random().toString(36).substr(2,9);
     }
 }
 
