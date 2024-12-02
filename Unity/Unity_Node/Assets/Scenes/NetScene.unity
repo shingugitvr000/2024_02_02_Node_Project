@@ -343,7 +343,7 @@ MonoBehaviour:
   SendButton: {fileID: 0}
   chatLog: {fileID: 0}
   statusText: {fileID: 0}
-  playerPrafabs: {fileID: 5138823124555893533, guid: 8e7972becbc8edc488c11c467c038162, type: 3}
+  playerPrefab: {fileID: 5138823124555893533, guid: 8e7972becbc8edc488c11c467c038162, type: 3}
 --- !u!4 &1768011745
 Transform:
   m_ObjectHideFlags: 0
